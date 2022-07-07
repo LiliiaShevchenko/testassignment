@@ -3,6 +3,7 @@ import pytest
 import json
 from allure_commons.types import AttachmentType
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.firefox.service import Service
 from webdriver_manager.firefox import GeckoDriverManager
@@ -11,10 +12,17 @@ from webdriver_manager.firefox import GeckoDriverManager
 with open('./tests/configuration.json') as file:
     data = json.load(file)
 
+
 @pytest.fixture()
 def browser():
     if data['browser'] == 'chrome':
-        browser = webdriver.Chrome(ChromeDriverManager().install())
+        if data['mode'] == 'headless':
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--disable-gpu')
+            browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        else:
+            browser = webdriver.Chrome(ChromeDriverManager().install())
     elif data['browser'] == "firefox":
         browser = webdriver.Firefox(service=Service(GeckoDriverManager().install()))
     # maximize browser window to full screen
